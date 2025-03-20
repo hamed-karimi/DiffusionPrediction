@@ -7,26 +7,32 @@ from PaperClipDataset import PaperclipDataset
 from torch.utils.data import DataLoader
 from UNet import AdvancedUNet
 from torch import optim
+import pickle
 
 if __name__ == '__main__':
     # Hyperparameters
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     batch_size = 4
+    num_workers = 4
     learning_rate = 1e-4
-    epochs = 30
-    betas_endpoints = (1e-04, 0.02)  # or (1e04, 0.02)
+    epochs = 50
+    betas_endpoints = (1e-03, 0.2)  # or (1e04, 0.02)
     n_timesteps = 150
 
-    folder_path1 = './minidataset'
-    # folder_path2 = '/mmfs1/data/projects/sccn/shared/transfers/objectsDiffusion/minidataset2'
-    Testing_data_folder = './minidataset_testing'
+    # folder_path1 = './minidataset'
+    # Testing_data_folder = './minidataset_testing'
+
+    folder_path1 = '/mmfs1/data/projects/sccn/shared/transfers/objectsDiffusion/minidataset'
+    folder_path2 = '/mmfs1/data/projects/sccn/shared/transfers/objectsDiffusion/minidataset2'
+    Testing_data_folder = '/mmfs1/data/projects/sccn/shared/transfers/objectsDiffusion/minidataset_testing'
+
     video_dict = create_video_dict(folder_path1)
     dataset = PaperclipDataset(video_dict)
     dataloader = DataLoader(
         dataset,
         batch_size=batch_size,
         shuffle=True,
-        num_workers=1,  # Adjust based on your CPU
+        num_workers=num_workers,  # Adjust based on your CPU
         pin_memory=True  # Useful when using CUDA
     )
 
@@ -44,3 +50,8 @@ if __name__ == '__main__':
                                           n_epochs=epochs,
                                           n_timesteps=n_timesteps)
     torch.save(model.state_dict(), 'predictive_diffusion_model.pth')
+
+    # Save track using pickle
+    with open('training_track.pkl', 'wb') as f:
+        # noinspection PyTypeChecker
+        pickle.dump(track, f)
