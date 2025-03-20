@@ -34,7 +34,7 @@ class AdvancedUNet(nn.Module):
         self.up3 = self.upconv_block(512, 128)   # 256 -> 128
         self.up2 = self.upconv_block(256, 64)    # 128 -> 64
         # self.up1 = self.upconv_block(128, 3)      # 64 -> 3 (output channels)
-        self.conv_out = nn.Conv2d(128, 3, 1)
+        self.conv_out = nn.ConvTranspose2d(128, 3, 2, 2)
 
     def conv_block(self, in_channels, out_channels):
         """Two convolution layers with BatchNorm and LeakyReLU"""
@@ -56,7 +56,7 @@ class AdvancedUNet(nn.Module):
         )
 
     def forward(self, x, context, timesteps):
-        # Encoder path (downsampling)
+        # we might need to normalize timesteps or apply a layer on them
         timesteps = torch.tile(timesteps.view(-1, 1, 1, 1), (1, 1, x.shape[2], x.shape[3]))
         x = torch.cat([x, context, timesteps], dim=1) # concatenate the noisy image and the context of the previous frames
         enc1 = self.enc1(x)

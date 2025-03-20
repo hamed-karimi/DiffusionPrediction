@@ -1,12 +1,14 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from DiffusionModel import forward_diffusion
+from DiffusionModel import DiffusionProcess
 from torch.cuda.amp import GradScaler, autocast
 import torch.nn.functional as F
 
 
-def train_model(device, dataloader, model, optimizer, n_epochs, betas, timesteps):
+def train_model(device,
+                diffusion_process: DiffusionProcess,
+                dataloader, model, optimizer, n_epochs, n_timesteps):
     # Training loop
     track = []
     scaler = GradScaler(enabled=True)
@@ -21,11 +23,11 @@ def train_model(device, dataloader, model, optimizer, n_epochs, betas, timesteps
             context = context.to(device)
 
             # Sample a random timestep t
-            time = torch.randint(0, timesteps, (x_0.shape[0],), device=device)
+            time = torch.randint(0, n_timesteps, (x_0.shape[0],), device=device)
 
             # Add noise (forward process)
-            noisy_x_t, true_noise = forward_diffusion(x_0, time, betas)
-
+            # noisy_x_t, true_noise = forward_diffusion(x_0, time, betas)
+            noisy_x_t, true_noise = diffusion_process.forward_diffusion(x_0, time)
             if torch.isnan(noisy_x_t).any():
                 print("NaNs detected in xt")
                 break
@@ -35,7 +37,7 @@ def train_model(device, dataloader, model, optimizer, n_epochs, betas, timesteps
             # loss = loss_fn(x_0, x_t, context, model, t, timesteps, betas, true_noise)
 
             with autocast(enabled=True):
-                noise_pred = model(noisy_x_t, timesteps)["sample"]
+                noise_pred = model(noisy_x_t, context, time)
                 loss = F.l1_loss(noise_pred, true_noise)
 
             scaler.scale(loss).backward()
