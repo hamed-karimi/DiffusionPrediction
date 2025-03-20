@@ -55,8 +55,9 @@ class DiffusionProcess:
         x_t = torch.randn((1, 3, context.shape[2], context.shape[3]),
                           generator=generator)
         x_t = x_t.to(context.device)
+        x_t_list = [x_t]
         for t in reversed(range(n_timesteps)):
-            if t > 1:
+            if t > 0:
                 z = torch.randn((1, 3, context.shape[2], context.shape[3]),
                                 generator=generator)
                 z = z.to(context.device)
@@ -67,8 +68,9 @@ class DiffusionProcess:
             alpha_cumprod_t = self.alphas_cumprod[t]
             with torch.no_grad():
                 pred_noise = model(x_t, context, torch.Tensor([t]).to(context.device))
-            x_t_1 = (x_t - pred_noise * (1-alpha_t) / torch.sqrt(1-alpha_cumprod_t)) / torch.sqrt(alpha_t) + torch.sqrt(beta_t) * z
+            x_t_1 = (x_t - pred_noise * (1-alpha_t) / torch.sqrt(1-alpha_cumprod_t)) / torch.sqrt(alpha_t) #+ torch.sqrt(beta_t) * z
 
             x_t = x_t_1.clone()
+            x_t_list.append(x_t)
 
-        return x_t
+        return x_t, x_t_list
