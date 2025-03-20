@@ -40,8 +40,8 @@ def train_model(device,
                 noise_pred = model(noisy_x_t.to(device),
                                    context.to(device),
                                    time.to(device))
-                loss = F.l1_loss(noise_pred, true_noise.to(device))
-
+                # loss = F.l1_loss(noise_pred, true_noise.to(device))
+                loss = F.mse_loss(noise_pred, true_noise.to(device))
             scaler.scale(loss).backward()
             # scaler.step(optimizer)
             # scaler.update()

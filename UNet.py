@@ -33,8 +33,8 @@ class AdvancedUNet(nn.Module):
         self.up4 = self.upconv_block(1024, 256)   # 512 -> 256
         self.up3 = self.upconv_block(512, 128)   # 256 -> 128
         self.up2 = self.upconv_block(256, 64)    # 128 -> 64
-        # self.up1 = self.upconv_block(128, 3)      # 64 -> 3 (output channels)
-        self.conv_out = nn.ConvTranspose2d(128, 3, 2, 2)
+        self.up1 = self.upconv_block(128, 3)      # 64 -> 3 (output channels)
+        # self.conv_out = nn.ConvTranspose2d(128, 3, 2, 2)
 
     def conv_block(self, in_channels, out_channels):
         """Two convolution layers with BatchNorm and LeakyReLU"""
@@ -78,8 +78,8 @@ class AdvancedUNet(nn.Module):
         up2 = self.up2(up3)
         up2 = center_crop_and_concat(up2, enc1)
 
-        output = self.conv_out(up2)
-        # up1 = self.up1(up2)
+        # output = self.conv_out(up2)
+        up1 = self.up1(up2)
 
-        return output
-
+        # return output
+        return up1
