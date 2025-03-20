@@ -48,9 +48,9 @@ def train_model(device,
 
             # loss.backward()
 
-            if any(torch.isnan(loss)):
-                print("NaNs detected in loss")
-                break
+            # if any(torch.isnan(loss)):
+            #     print("NaNs detected in loss")
+            #     break
 
             # clip gradients
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
