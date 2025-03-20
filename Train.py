@@ -23,7 +23,7 @@ def train_model(device,
             context = context.to(device)
 
             # Sample a random timestep t
-            time = torch.randint(0, n_timesteps, (x_0.shape[0],), device=device)
+            time = torch.randint(0, n_timesteps, (x_0.shape[0],))
 
             # Add noise (forward process)
             # noisy_x_t, true_noise = forward_diffusion(x_0, time, betas)
@@ -37,7 +37,7 @@ def train_model(device,
             # loss = loss_fn(x_0, x_t, context, model, t, timesteps, betas, true_noise)
 
             with autocast(enabled=True):
-                noise_pred = model(noisy_x_t, context, time)
+                noise_pred = model(noisy_x_t, context, time.to(device))
                 loss = F.l1_loss(noise_pred, true_noise)
 
             scaler.scale(loss).backward()
