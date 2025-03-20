@@ -50,16 +50,15 @@ class DiffusionProcess:
 
     def generate_next_image(self, model, context, n_timesteps):
         generator = torch.manual_seed(0)
+        print('context device', context.device)
         assert context.dim() == 4, "Context must be a 4D tensor for image generation"
         x_t = torch.randn((1, 3, context.shape[2], context.shape[3]),
-                          generator=generator,
-                          device=context.device)
-
+                          generator=generator)
+        x_t = x_t.to(context.device)
         for t in reversed(range(n_timesteps)):
             if t > 1:
                 z = torch.randn((1, 3, context.shape[2], context.shape[3]),
-                                generator=generator,
-                                device=context.device)
+                                generator=generator)
                 z = z.to(context.device)
             else:
                 z = 0
