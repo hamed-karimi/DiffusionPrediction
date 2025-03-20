@@ -21,7 +21,7 @@ class DiffusionProcess:
         self.timesteps = np.arange(n_timesteps)
         self.betas = linear_beta_schedule(n_timesteps, beta_start, beta_end)
         self.alphas = 1.0 - self.betas
-        self.alphas_cumprod = np.cumprod(self.alphas, axis=0)
+        self.alphas_cumprod = torch.cumprod(self.alphas, dim=0)
 
     def forward_diffusion(self, x_0, time):
         alpha_cumprod_t = self.alphas_cumprod[time]

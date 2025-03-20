@@ -18,9 +18,9 @@ def train_model(device,
         for batch_idx, sample in enumerate(dataloader):
 
             x_0 = sample['target']
-            x_0 = x_0.to(device)
+            # x_0 = x_0.to(device)
             context = sample['context']
-            context = context.to(device)
+            # context = context.to(device)
 
             # Sample a random timestep t
             time = torch.randint(0, n_timesteps, (x_0.shape[0],))
@@ -37,7 +37,9 @@ def train_model(device,
             # loss = loss_fn(x_0, x_t, context, model, t, timesteps, betas, true_noise)
 
             with autocast(enabled=True):
-                noise_pred = model(noisy_x_t, context, time.to(device))
+                noise_pred = model(noisy_x_t.to(device),
+                                   context.to(device),
+                                   time.to(device))
                 loss = F.l1_loss(noise_pred, true_noise)
 
             scaler.scale(loss).backward()
