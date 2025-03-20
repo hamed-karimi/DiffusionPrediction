@@ -3,7 +3,7 @@ from DiffusionModel import DiffusionProcess
 
 def predict_image(diffusion_process: DiffusionProcess,
                   model, context, n_timesteps):
-    next_image = diffusion_process.generate_next_image(model, context.unsqueez(0), n_timesteps)
+    next_image = diffusion_process.generate_next_image(model, context.unsqueeze(0), n_timesteps)
     return next_image
 
 # def visualize_denoising_example(model, sample, device, timesteps, betas):
