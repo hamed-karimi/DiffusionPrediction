@@ -66,7 +66,7 @@ class DiffusionProcess:
             alpha_t = self.alphas[t]
             alpha_cumprod_t = self.alphas_cumprod[t]
             with torch.no_grad():
-                pred_noise = model(x_t, context, torch.Tensor([t], device=context.device))
+                pred_noise = model(x_t, context, torch.Tensor([t]).to(context.device))
             x_t_1 = (x_t - pred_noise * (1-alpha_t) / torch.sqrt(1-alpha_cumprod_t)) / torch.sqrt(alpha_t) + torch.sqrt(beta_t) * z
 
             x_t = x_t_1.clone()
