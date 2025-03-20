@@ -48,7 +48,7 @@ def train_model(device,
 
             # loss.backward()
 
-            if torch.isnan(loss).any():
+            if any(torch.isnan(loss)):
                 print("NaNs detected in loss")
                 break
 
