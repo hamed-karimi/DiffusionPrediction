@@ -54,8 +54,7 @@ class DiffusionProcess:
         assert context.dim() == 4, "Context must be a 4D tensor for image generation"
         # x_t = torch.randn((1, 3, context.shape[2], context.shape[3]),
         #                   generator=generator)
-        x_t = self.forward_diffusion(torch.zeros((1, 3, context.shape[2], context.shape[3])),
-                                     n_timesteps)[0]
+        x_t, _ = self.forward_diffusion(torch.zeros((1, 3, context.shape[2], context.shape[3])), n_timesteps)
         x_t = x_t.to(context.device)
         x_t_list = [x_t]
         for t in reversed(range(n_timesteps)):
@@ -66,11 +65,10 @@ class DiffusionProcess:
             else:
                 z = 0
             beta_t = self.betas[t]
-            alpha_t = self.alphas[t]
             alpha_cumprod_t = self.alphas_cumprod[t]
             with torch.no_grad():
                 pred_noise = model(x_t, context, torch.Tensor([t]).to(context.device))
-            x_t_1 = (x_t - pred_noise * (1-alpha_t) / torch.sqrt(1-alpha_cumprod_t)) / torch.sqrt(alpha_t) #+ torch.sqrt(beta_t) * z
+            x_t_1 = (x_t - (beta_t / torch.sqrt(1-alpha_cumprod_t)) * pred_noise ) / torch.sqrt(1-alpha_cumprod_t) + torch.sqrt(beta_t) * z
 
             x_t = x_t_1.clone()
             x_t_list.append(x_t)
