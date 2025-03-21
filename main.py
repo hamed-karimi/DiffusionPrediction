@@ -1,3 +1,4 @@
+import Eval
 from Train import train_model, init_weights
 import torch
 import DiffusionModel
@@ -10,6 +11,7 @@ from torch import optim
 import pickle
 
 if __name__ == '__main__':
+    mode = 'Test'
     # Hyperparameters
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     batch_size = 4
@@ -19,12 +21,12 @@ if __name__ == '__main__':
     betas_endpoints = (1e-03, 0.2)  # or (1e04, 0.02)
     n_timesteps = 150
 
-    # folder_path1 = './minidataset'
-    # Testing_data_folder = './minidataset_testing'
+    folder_path1 = './minidataset'
+    Testing_data_folder = './minidataset_testing'
 
-    folder_path1 = '/mmfs1/data/projects/sccn/shared/transfers/objectsDiffusion/minidataset'
-    folder_path2 = '/mmfs1/data/projects/sccn/shared/transfers/objectsDiffusion/minidataset2'
-    Testing_data_folder = '/mmfs1/data/projects/sccn/shared/transfers/objectsDiffusion/minidataset_testing'
+    # folder_path1 = '/mmfs1/data/projects/sccn/shared/transfers/objectsDiffusion/minidataset'
+    # folder_path2 = '/mmfs1/data/projects/sccn/shared/transfers/objectsDiffusion/minidataset2'
+    # Testing_data_folder = '/mmfs1/data/projects/sccn/shared/transfers/objectsDiffusion/minidataset_testing'
 
     video_dict = create_video_dict(folder_path1)
     dataset = PaperclipDataset(video_dict)
@@ -40,18 +42,32 @@ if __name__ == '__main__':
                                                         beta_start=betas_endpoints[0],
                                                         beta_end=betas_endpoints[1])
     model = AdvancedUNet().to(device)
-    model.apply(init_weights)
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    model, optimizer, track = train_model(device=device,
-                                          dataloader=dataloader,
-                                          diffusion_process=diffusion_process,
-                                          optimizer=optimizer,
-                                          model=model,
-                                          n_epochs=epochs,
-                                          n_timesteps=n_timesteps)
-    torch.save(model.state_dict(), 'predictive_diffusion_model.pth')
+    if mode == 'Train':
+        model.apply(init_weights)
+        optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+        model, optimizer, track = train_model(device=device,
+                                              dataloader=dataloader,
+                                              diffusion_process=diffusion_process,
+                                              optimizer=optimizer,
+                                              model=model,
+                                              n_epochs=epochs,
+                                              n_timesteps=n_timesteps)
+        torch.save(model.state_dict(), 'predictive_diffusion_model.pth')
 
-    # Save track using pickle
-    with open('training_track.pkl', 'wb') as f:
-        # noinspection PyTypeChecker
-        pickle.dump(track, f)
+        # Save track using pickle
+        with open('training_track.pkl', 'wb') as f:
+            # noinspection PyTypeChecker
+            pickle.dump(track, f)
+
+    if mode == 'Test':
+        infer_time = 100
+        model.load_state_dict(torch.load('predictive_diffusion_model.pth', map_location=device))
+        test_image = dataset.__getitem__(7)
+        context = test_image['context'].unsqueeze(0)
+        target = test_image['target'].unsqueeze(0)
+        # noisy = diffusion_process.forward_diffusion(target.to(device), torch.tensor([infer_time - 1]))[0]
+        # next_pred = diffusion_process.one_step_denoise(model, noisy.to(device), context.to(device),
+        #                                                torch.tensor([infer_time - 1]))
+        # denoised_next_pred_img = next_pred[0].permute([1, 2, 0]).cpu().numpy()
+
+        generated_image = Eval.predict_image(diffusion_process, model, context, infer_time)
