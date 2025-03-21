@@ -70,4 +70,5 @@ if __name__ == '__main__':
         #                                                torch.tensor([infer_time - 1]))
         # denoised_next_pred_img = next_pred[0].permute([1, 2, 0]).cpu().numpy()
 
-        generated_image = Eval.predict_image(diffusion_process, model, context, infer_time)
+        # generated_image = Eval.predict_image(diffusion_process, model, context, infer_time)
+        corr_prev, corr_curr, corr_next = Eval.prediction_correlation(diffusion_process, device, model, dataset, infer_time)
