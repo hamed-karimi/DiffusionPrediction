@@ -18,15 +18,15 @@ def prediction_correlation(diffusion_process: DiffusionProcess, device,model, da
         target = test_image['target'].unsqueeze(0).to(device)
         generated_image, _ = predict_image(diffusion_process, model, context, n_timesteps)
         corr_prev = np.corrcoef(context[:, :3, :, :].squeeze().cpu().numpy().flatten(),
-                                generated_image.squeeze().numpy().flatten())[0, 1]
+                                generated_image.squeeze().cpu().numpy().flatten())[0, 1]
         all_corr_prev.append(corr_prev)
 
         corr_curr = np.corrcoef(context[:, 3:, :, :].squeeze().cpu().numpy().flatten(),
-                                generated_image.squeeze().numpy().flatten())[0, 1]
+                                generated_image.squeeze().cpu().numpy().flatten())[0, 1]
         all_corr_curr.append(corr_curr)
 
         corr_next = np.corrcoef(target.squeeze().cpu().numpy().flatten(),
-                                generated_image.squeeze().numpy().flatten())[0, 1]
+                                generated_image.squeeze().cpu().numpy().flatten())[0, 1]
         all_corr_next.append(corr_next)
 
     return all_corr_prev, all_corr_curr, all_corr_next
