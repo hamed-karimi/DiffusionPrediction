@@ -39,9 +39,9 @@ class DiffusionProcess:
     def one_step_denoise(self, model, noisy_x_t, context, timesteps):
         model.eval()
         with torch.no_grad():
-            predicted_noise = model(noisy_x_t, context, timesteps)  # The model predicts the noise at timestep t -> 0
+            predicted_noise = model(noisy_x_t, context, timesteps.to(context.device))  # The model predicts the noise at timestep t -> 0
 
-        alpha_t = self.alphas[timesteps].to(noisy_x_t)
+        alpha_t = self.alphas[timesteps].to(noisy_x_t.device)
         sqrt_alpha_t = torch.sqrt(alpha_t).view(-1, 1, 1, 1).to(noisy_x_t.device)
         beta_t = self.betas[timesteps].view(-1, 1, 1, 1).to(noisy_x_t.device)
         sqrt_one_minus_alpha_t = torch.sqrt(1 - self.alphas_cumprod[timesteps]).view(-1, 1, 1, 1).to(noisy_x_t.device)
