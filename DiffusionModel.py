@@ -41,9 +41,10 @@ class DiffusionProcess:
         with torch.no_grad():
             predicted_noise = model(noisy_x_t, context, timesteps)  # The model predicts the noise at timestep t -> 0
 
-        sqrt_alpha_t = torch.sqrt(self.alphas[timesteps]).view(-1, 1, 1, 1)
-        beta_t = self.betas[timesteps].view(-1, 1, 1, 1)
-        sqrt_one_minus_alpha_t = torch.sqrt(1 - self.alphas_cumprod[timesteps]).view(-1, 1, 1, 1)
+        alpha_t = self.alphas[timesteps].to(noisy_x_t)
+        sqrt_alpha_t = torch.sqrt(alpha_t).view(-1, 1, 1, 1).to(noisy_x_t.device)
+        beta_t = self.betas[timesteps].view(-1, 1, 1, 1).to(noisy_x_t.device)
+        sqrt_one_minus_alpha_t = torch.sqrt(1 - self.alphas_cumprod[timesteps]).view(-1, 1, 1, 1).to(noisy_x_t.device)
         denoised_image = (noisy_x_t - (beta_t/sqrt_one_minus_alpha_t) * predicted_noise) / sqrt_alpha_t
 
         return denoised_image
