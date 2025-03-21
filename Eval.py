@@ -7,8 +7,8 @@ def predict_image(diffusion_process: DiffusionProcess,
     next_image, x_t_list = diffusion_process.generate_next_image(model, context, n_timesteps)
     return next_image, x_t_list
 
-def prediction_correlation(diffusion_process: DiffusionProcess, device,model, dataset, n_timesteps):
-    n_sample = 50
+def prediction_correlation(diffusion_process: DiffusionProcess, sample_ratio, device,model, dataset, n_timesteps):
+    n_sample = int(len(dataset) * sample_ratio)
     sample_inds = np.random.choice(len(dataset), n_sample, replace=False)
     all_corr_prev = []
     all_corr_curr = []
