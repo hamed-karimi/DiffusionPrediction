@@ -55,7 +55,8 @@ class DiffusionProcess:
         assert context.dim() == 4, "Context must be a 4D tensor for image generation"
         # x_t = torch.randn((1, 3, context.shape[2], context.shape[3]),
         #                   generator=generator)
-        x_t, _ = self.forward_diffusion(torch.zeros((1, 3, context.shape[2], context.shape[3])), n_timesteps)
+        init_x_t = torch.ones((1, 3, context.shape[2], context.shape[3]))
+        x_t, _ = self.forward_diffusion(init_x_t, n_timesteps)
         x_t = x_t.to(context.device)
         x_t_list = [x_t]
         for t in reversed(range(n_timesteps)):
