@@ -9,11 +9,12 @@ def predict_image(diffusion_process: DiffusionProcess,
 
 def prediction_correlation(diffusion_process: DiffusionProcess, device,model, dataset, n_timesteps):
     n_sample = 50
+    sample_inds = np.random.choice(len(dataset), n_sample, replace=False)
     all_corr_prev = []
     all_corr_curr = []
     all_corr_next = []
-    for i in range(n_sample):
-        test_image = dataset.__getitem__(7)
+    for i in sample_inds:
+        test_image = dataset.__getitem__(i)
         context = test_image['context'].unsqueeze(0).to(device)
         target = test_image['target'].unsqueeze(0).to(device)
         generated_image, _ = predict_image(diffusion_process, model, context, n_timesteps)
