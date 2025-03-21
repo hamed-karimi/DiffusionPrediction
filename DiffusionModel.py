@@ -65,11 +65,12 @@ class DiffusionProcess:
                 z = z.to(context.device)
             else:
                 z = 0
-            beta_t = self.betas[t]
-            alpha_cumprod_t = self.alphas_cumprod[t]
+            beta_t = self.betas[t].to(context.device)
+            alpha_t = self.alphas[t].to(context.device)
+            alpha_cumprod_t = self.alphas_cumprod[t].to(context.device)
             with torch.no_grad():
                 pred_noise = model(x_t, context, torch.Tensor([t]).to(context.device))
-            x_t_1 = (x_t - (beta_t / torch.sqrt(1-alpha_cumprod_t)) * pred_noise ) / torch.sqrt(1-alpha_cumprod_t) + torch.sqrt(beta_t) * z
+            x_t_1 = (x_t - pred_noise * beta_t / torch.sqrt(1-alpha_cumprod_t)) / torch.sqrt(alpha_t) + torch.sqrt(beta_t) * z
 
             x_t = x_t_1.clone()
             x_t_list.append(x_t)
